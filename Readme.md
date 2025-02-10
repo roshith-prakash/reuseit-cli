@@ -15,8 +15,7 @@ To use the `Re-use-it! CLI` tool in your React project, follow these steps:
 
 ### Step 1: Install Tailwind and set up the Custom Tailwind Classes
 
-- [Install Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)
-- [Custom Tailwind Configuration](https://re-use-it.vercel.app/components/tailwind-configuration)
+- [Check out the instructions here!](https://re-use-it.vercel.app/components/getting-started)
 
 ### Step 2: Add the component to your project
 
