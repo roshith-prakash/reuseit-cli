@@ -13,15 +13,10 @@
 
 To use the `Re-use-it! CLI` tool in your React project, follow these steps:
 
-### Step 1: Install the CLI globally (optional)
+### Step 1: Install Tailwind and set up the Custom Tailwind Classes
 
-You can install this CLI globally via npm or yarn. Run one of the following commands in your terminal:
-
-```bash
-npm install -g reuseit
-```
-
-However, for a quicker setup, you can use `npx` without needing to install it globally.
+- [Install Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)
+- [Custom Tailwind Configuration](https://re-use-it.vercel.app/components/tailwind-configuration)
 
 ### Step 2: Add the component to your project
 
