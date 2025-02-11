@@ -1,6 +1,6 @@
 {
   "name": "reuseit",
-  "version": "1.2.3",
+  "version": "1.5.1",
   "description": "CLI for downloading components from Re-use-it!",
   "main": "index.js",
   "bin": {
