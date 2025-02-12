@@ -6,7 +6,7 @@ const { Command } = require('commander');
 // Initialize the CLI using Commander
 const program = new Command();
 
-// Function to check if Tailwind CSS is installed
+// Function to check if Tailwind CSS is installed 
 function isTailwindInstalled() {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
 
@@ -14,20 +14,108 @@ function isTailwindInstalled() {
     if (fs.existsSync(packageJsonPath)) {
       const packageJson = require(packageJsonPath);
 
-      // Check if Tailwind is in dependencies or devDependencies
-      return (
-        (packageJson.dependencies && packageJson.dependencies.tailwindcss) ||
-        (packageJson.devDependencies && packageJson.devDependencies.tailwindcss)
-      );
+      // Check if Tailwind CSS is listed in dependencies or devDependencies
+      const tailwindVersion = packageJson.dependencies?.tailwindcss || packageJson.devDependencies?.tailwindcss;
+      
+      if (tailwindVersion) {
+        return true; // Tailwind is installed
+      }
     }
   } catch (error) {
     console.error("Error reading package.json:", error.message);
   }
 
-  return false;
+  return false; // Tailwind not found
 }
 
-// Function to download a file from GitHub and save it locally
+// Function to check Tailwind CSS version
+function getTailwindVersion() {
+  const packageJsonPath = path.join(process.cwd(), 'node_modules', 'tailwindcss', 'package.json');
+
+  try {
+    if (fs.existsSync(packageJsonPath)) {
+      const tailwindPackage = require(packageJsonPath);
+      return tailwindPackage.version;
+    }
+  } catch (error) {
+    console.error("Error reading Tailwind version:", error.message);
+  }
+
+  return null;
+}
+
+// Function to deeply merge two objects
+function deepMerge(target, source) {
+  // If the source is an object and the target is also an object, perform a deep merge
+  if (typeof source === 'object' && source !== null && typeof target === 'object' && target !== null) {
+    Object.keys(source).forEach(key => {
+      if (typeof source[key] === 'object' && source[key] !== null && key in target) {
+        deepMerge(target[key], source[key]); // Recursive merge
+      } else {
+        target[key] = source[key]; // Overwrite or add the property
+      }
+    });
+  } else {
+    target = source; // If not an object, just assign the source to the target
+  }
+  return target;
+}
+
+// Function to merge custom styles with existing Tailwind config
+function mergeTailwindConfig(configPath, newConfig) {
+  let existingConfig = {};
+
+  try {
+    if (fs.existsSync(configPath)) {
+      existingConfig = require(configPath);
+    }
+  } catch (error) {
+    console.error("Error reading Tailwind config:", error.message);
+  }
+
+  // Perform a deep merge of the existing config with new config
+  const mergedConfig = deepMerge(existingConfig, newConfig);
+
+  // Write the merged configuration back
+  fs.writeFileSync(configPath, `module.exports = ${JSON.stringify(mergedConfig, null, 2)}\n`);
+  console.log("Tailwind configuration successfully updated!");
+}
+
+// Function to add custom styles for Tailwind v3
+function addTailwindV3Styles() {
+  const tailwindConfigPath = path.join(process.cwd(), 'tailwind.config.js');
+
+  const customStylesV3 = {
+    content: ["./src/**/*.{html,js,jsx,tsx}"],
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          "darkbg": "#181818",
+          "secondarydarkbg": "#1E1E1E",
+          "darkmodetext": "#E4E4E4",
+          "cta": "#9b0ced",
+          "hovercta": "#7123b0",
+          "black": "#000000",
+          "white": "#ffffff",
+          "heading": "#1e1e1f",
+          "grey": "#f5f5f5",
+          "error": "#f23f3f",
+          "darkmodeCTA": "#b458ff"
+        },
+        fontFamily: {
+          'inter': ['Inter', 'system-ui'],
+          'dmSans': ['DM Sans', 'system-ui']
+        },
+      },
+    },
+    plugins: [],
+  };
+
+  mergeTailwindConfig(tailwindConfigPath, customStylesV3);
+}
+
+// Function to download a file from GitHub and save it locally 
 async function downloadFile(url, destination, filename) {
   try {
     // Fetch the raw file from GitHub
@@ -109,6 +197,33 @@ const snippetMapping = {
   shufflearray : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/shuffleArray.ts"
 }
 
+// Define the init command to set up custom Tailwind style 
+program
+  .command('init')
+  .description('Initialize custom Tailwind styles for your project.')
+  .action(() => {
+    if (!isTailwindInstalled()) {
+      console.error("Tailwind CSS is not installed. Please install Tailwind CSS before proceeding.");
+      process.exit(1);
+    }
+
+    const tailwindVersion = getTailwindVersion();
+    
+    if (!tailwindVersion) {
+      console.error("Unable to determine Tailwind version.");
+      process.exit(1);
+    }
+
+    console.log(`Detected Tailwind CSS version: ${tailwindVersion}`);
+
+    if (tailwindVersion.startsWith('3')) {
+      addTailwindV3Styles();
+    } else if (tailwindVersion.startsWith('4')) {
+      console.log("Init command not yet supported for Tailwind v4. Please copy custom styles from : https://re-use-it.vercel.app/components/tailwind-configuration ")
+    } else {
+      console.log("Unsupported Tailwind version detected.");
+    }
+  });
 
 // Define the CLI command to fetch and save the file based on the component name
 program
@@ -143,8 +258,6 @@ program
 
     // Download the file and save it locally
     await downloadFile(url, destinationPath, filename);
-
-    console.log(`Please make sure to add the custom styles to your tailwind configuration!\nCheck out : https://re-use-it.vercel.app/components/tailwind-configuration `);
   });
 
 // Define the CLI command to fetch and save the file based on the snippet name
