@@ -2,6 +2,8 @@
 
 `Re-use-it! CLI` is a command-line tool that allows you to quickly and easily download reusable React components and snippets into your project. You can fetch individual components or utility snippets from the **Re-use-it** library and add them directly to your project's codebase.
 
+Check out Re-use-it! components : [Re-use-it](https://re-use-it.vercel.app)
+
 ## Features
 
 - Easily fetch and download React components from the [Re-use-it](https://github.com/roshith-prakash/re-use-it) repository.
