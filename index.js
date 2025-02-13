@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 const { Command } = require('commander');
 
 // Initialize the CLI using Commander
@@ -86,34 +87,203 @@ function addTailwindV3Styles() {
   const tailwindConfigPath = path.join(process.cwd(), 'tailwind.config.js');
 
   const customStylesV3 = {
-    content: ["./src/**/*.{html,js,jsx,tsx}"],
-    darkMode: 'class',
+    content: ["./src/**/*.{html,js,jsx,tsx}"], // Adjust as needed
+    darkMode: 'class', // Enable dark mode via class
     theme: {
       extend: {
         colors: {
-          "darkbg": "#181818",
-          "secondarydarkbg": "#1E1E1E",
-          "darkmodetext": "#E4E4E4",
           "cta": "#9b0ced",
           "hovercta": "#7123b0",
-          "black": "#000000",
-          "white": "#ffffff",
-          "heading": "#1e1e1f",
+          "darkbg": "#181818",
+          "secondarydarkbg": "#1e1e1e",
+          "darkmodetext": "#e4e4e4",
           "grey": "#f5f5f5",
           "error": "#f23f3f",
-          "darkmodeCTA": "#b458ff"
+          "darkmodeCTA": "#b458ff",
         },
         fontFamily: {
-          'inter': ['Inter', 'system-ui'],
-          'dmSans': ['DM Sans', 'system-ui']
+          'title': ['Playwrite IN', 'sans-serif'],
+          'sans': ['Open Sans', 'serif'],
+          'pacifico': ['Pacifico', 'serif'],
+        },
+        animation: {
+          fadeIn: 'fadeIn 0.3s ease-in-out',
+          fadeOut: 'fadeOut 0.3s ease-in-out',
+        },
+        keyframes: {
+          fadeIn: {
+            '0%': { opacity: '0.3' },
+            '100%': { opacity: '1' },
+          },
+          fadeOut: {
+            '0%': { opacity: '1' },
+            '100%': { opacity: '0.3' },
+          },
         },
       },
     },
     plugins: [],
-  };
+  }
+
+  const indexCssContent  = `
+  input::placeholder {
+  transition: color 0.2s;
+}
+
+/* Height for horizontal scrollbar */
+.scroller::-webkit-scrollbar {
+  height: 5px; /* Reduce the height for a thin horizontal scrollbar */
+  width: 5px;
+}
+
+/* Track */
+.scroller::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background for the scrollbar track */
+}
+
+/* Handle */
+.scroller::-webkit-scrollbar-thumb {
+  background: #888; /* Color for the scrollbar handle */
+  border-radius: 5px; /* Optional: Add rounding for a smoother look */
+}
+
+/* Handle on hover */
+.scroller::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker color on hover */
+}`
+
+  const indexCssPath = path.join(process.cwd(), 'src/index.css');
+  fs.appendFileSync(indexCssPath, indexCssContent, 'utf8');
+  
 
   mergeTailwindConfig(tailwindConfigPath, customStylesV3);
 }
+
+// Function to prompt for confirmation before overwriting index.css
+function promptForV4Styles() {
+  console.log(`Tailwind v4 detected. The init command will overwrite your css file. Do you want to continue?`);
+  
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  rl.question("Type 'y' to continue or 'n' to cancel: ", function(answer) {
+    if (answer.charAt(0).toLowerCase() === 'y') {
+      console.log("Proceeding with Tailwind v4 custom styles...");
+      addTailwindV4Styles();
+    } else if (answer.charAt(0).toLowerCase() === 'n') {
+      console.log("Action canceled. No changes were made.");
+    } else {
+      console.log("Invalid input. Please type 'y' to continue or 'n' to cancel.");
+    }
+    rl.close();
+  });
+}
+
+// Function to add custom styles for Tailwind v4 by overwriting the index.css file
+function addTailwindV4Styles() {
+  let indexCssPath = '';
+
+  // Check the framework and set the path accordingly
+  if (fs.existsSync(path.join(process.cwd(), 'next.config.js')) || fs.existsSync(path.join(process.cwd(), 'next.config.ts'))) {
+    // Next.js
+    indexCssPath = path.join(process.cwd(), 'styles', 'globals.css'); // Assuming Tailwind config in globals.css
+  }
+  
+  else if (fs.existsSync(path.join(process.cwd(), 'vite.config.js')) || fs.existsSync(path.join(process.cwd(), 'vite.config.ts'))) {
+    // Vite
+    indexCssPath = path.join(process.cwd(), 'src', 'index.css');
+  } 
+  
+  else if (fs.existsSync(path.join(process.cwd(), 'remix.config.js')) || fs.existsSync(path.join(process.cwd(), 'remix.config.ts'))) {
+    // Remix
+    indexCssPath = path.join(process.cwd(), 'src', 'styles', 'tailwind.css');
+  } 
+  
+  else if (fs.existsSync(path.join(process.cwd(), 'gatsby-config.js')) || fs.existsSync(path.join(process.cwd(), 'gatsby-config.ts'))) {
+    // Gatsby
+    indexCssPath = path.join(process.cwd(), 'src', 'styles', 'index.css');
+  } 
+  
+  else if (fs.existsSync(path.join(process.cwd(), 'react-router-config.js')) || fs.existsSync(path.join(process.cwd(), 'react-router-config.ts'))) {
+    // React Router 7 (Can depend on the specific setup, assuming a common path)
+    indexCssPath = path.join(process.cwd(), 'src', 'index.css');
+  } 
+  
+  else if (fs.existsSync(path.join(process.cwd(), 'tanstack.config.js')) || fs.existsSync(path.join(process.cwd(), 'tanstack.config.ts'))) {
+    // Tanstack Start
+    indexCssPath = path.join(process.cwd(), 'src', 'styles', 'main.css');
+  } 
+  
+  else {
+    console.log('Framework not recognized, defaulting to index.css');
+    indexCssPath = path.join(process.cwd(), 'src', 'index.css');
+  }
+
+  const customStylesV4 = `@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Custom Colors */
+  --color-cta: #9b0ced;
+  --color-hovercta: #7123b0;
+  --color-darkbg: #181818;
+  --color-secondarydarkbg: #1e1e1e;
+  --color-darkmodetext: #e4e4e4;
+  --color-grey: #f5f5f5;
+  --color-error: #f23f3f;
+  --color-darkmodeCTA: #b458ff;
+
+  /* Custom Fonts */
+  --font-title: "Playwrite IN", sans-serif;
+  --font-sans: "Open Sans", serif;
+  --font-pacifico: "Pacifico", serif;
+
+  /* Custom Animations for the Modal */
+  --animate-fadeIn: fadeIn 0.3s ease-in-out;
+  @keyframes fadeIn {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+
+  --animate-fadeOut: fadeOut 0.3s ease-in-out;
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0.3; }
+  }
+}
+
+input::placeholder {
+  transition: color 0.2s;
+}
+
+/* Horizontal Scrollbar */
+.scroller::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.scroller::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+`;
+
+  // Overwrite the css file
+  fs.writeFileSync(indexCssPath, customStylesV4, 'utf8');
+  console.log(`Custom styles for Tailwind v4 added at ${indexCssPath}.`);
+};
+
 
 // Function to download a file from GitHub and save it locally 
 async function downloadFile(url, destination, filename) {
@@ -219,7 +389,7 @@ program
     if (tailwindVersion.startsWith('3')) {
       addTailwindV3Styles();
     } else if (tailwindVersion.startsWith('4')) {
-      console.log("Init command not yet supported for Tailwind v4. Please copy custom styles from : https://re-use-it.vercel.app/components/tailwind-configuration ")
+      promptForV4Styles();
     } else {
       console.log("Unsupported Tailwind version detected.");
     }
