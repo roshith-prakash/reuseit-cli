@@ -284,7 +284,6 @@ input::placeholder {
   console.log(`Custom styles for Tailwind v4 added at ${indexCssPath}.`);
 };
 
-
 // Function to download a file from GitHub and save it locally 
 async function downloadFile(url, destination, filename) {
   try {
@@ -329,6 +328,7 @@ const componentMapping = {
   checkbox: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Checkbox.tsx',
   combobox: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Combobox.tsx',
   drawer: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Drawer.tsx',
+  datepicker: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/DatePicker.tsx',
   footer: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Footer.tsx',
   input: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Input.tsx',
   loader: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Loader.tsx',
