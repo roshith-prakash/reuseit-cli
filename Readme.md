@@ -74,6 +74,7 @@ Here are the components you can add to your project using the CLI:
 - `checkbox`
 - `combobox`
 - `drawer`
+- `datePicker`
 - `footer`
 - `input`
 - `loader`
