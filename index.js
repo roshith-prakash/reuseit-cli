@@ -1,23 +1,27 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-const { Command } = require('commander');
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
+const { Command } = require("commander");
+const { snippetMapping } = require("./snippetMapping");
+const { componentMapping } = require("./componentMapping");
 
 // Initialize the CLI using Commander
 const program = new Command();
 
-// Function to check if Tailwind CSS is installed 
+// Function to check if Tailwind CSS is installed
 function isTailwindInstalled() {
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const packageJsonPath = path.join(process.cwd(), "package.json");
 
   try {
     if (fs.existsSync(packageJsonPath)) {
       const packageJson = require(packageJsonPath);
 
       // Check if Tailwind CSS is listed in dependencies or devDependencies
-      const tailwindVersion = packageJson.dependencies?.tailwindcss || packageJson.devDependencies?.tailwindcss;
-      
+      const tailwindVersion =
+        packageJson.dependencies?.tailwindcss ||
+        packageJson.devDependencies?.tailwindcss;
+
       if (tailwindVersion) {
         return true; // Tailwind is installed
       }
@@ -31,7 +35,12 @@ function isTailwindInstalled() {
 
 // Function to check Tailwind CSS version
 function getTailwindVersion() {
-  const packageJsonPath = path.join(process.cwd(), 'node_modules', 'tailwindcss', 'package.json');
+  const packageJsonPath = path.join(
+    process.cwd(),
+    "node_modules",
+    "tailwindcss",
+    "package.json"
+  );
 
   try {
     if (fs.existsSync(packageJsonPath)) {
@@ -48,9 +57,18 @@ function getTailwindVersion() {
 // Function to deeply merge two objects
 function deepMerge(target, source) {
   // If the source is an object and the target is also an object, perform a deep merge
-  if (typeof source === 'object' && source !== null && typeof target === 'object' && target !== null) {
-    Object.keys(source).forEach(key => {
-      if (typeof source[key] === 'object' && source[key] !== null && key in target) {
+  if (
+    typeof source === "object" &&
+    source !== null &&
+    typeof target === "object" &&
+    target !== null
+  ) {
+    Object.keys(source).forEach((key) => {
+      if (
+        typeof source[key] === "object" &&
+        source[key] !== null &&
+        key in target
+      ) {
         deepMerge(target[key], source[key]); // Recursive merge
       } else {
         target[key] = source[key]; // Overwrite or add the property
@@ -78,54 +96,57 @@ function mergeTailwindConfig(configPath, newConfig) {
   const mergedConfig = deepMerge(existingConfig, newConfig);
 
   // Write the merged configuration back
-  fs.writeFileSync(configPath, `module.exports = ${JSON.stringify(mergedConfig, null, 2)}\n`);
+  fs.writeFileSync(
+    configPath,
+    `module.exports = ${JSON.stringify(mergedConfig, null, 2)}\n`
+  );
   console.log("Tailwind configuration successfully updated!");
 }
 
 // Function to add custom styles for Tailwind v3
 function addTailwindV3Styles() {
-  const tailwindConfigPath = path.join(process.cwd(), 'tailwind.config.js');
+  const tailwindConfigPath = path.join(process.cwd(), "tailwind.config.js");
 
   const customStylesV3 = {
     content: ["./src/**/*.{html,js,jsx,tsx}"], // Adjust as needed
-    darkMode: 'class', // Enable dark mode via class
+    darkMode: "class", // Enable dark mode via class
     theme: {
       extend: {
         colors: {
-          "cta": "#9b0ced",
-          "hovercta": "#7123b0",
-          "darkbg": "#181818",
-          "secondarydarkbg": "#1e1e1e",
-          "darkmodetext": "#e4e4e4",
-          "grey": "#f5f5f5",
-          "error": "#f23f3f",
-          "darkmodeCTA": "#b458ff",
+          cta: "#9b0ced",
+          hovercta: "#7123b0",
+          darkbg: "#181818",
+          secondarydarkbg: "#1e1e1e",
+          darkmodetext: "#e4e4e4",
+          grey: "#f5f5f5",
+          error: "#f23f3f",
+          darkmodeCTA: "#b458ff",
         },
         fontFamily: {
-          'title': ['Playwrite IN', 'sans-serif'],
-          'sans': ['Open Sans', 'serif'],
-          'pacifico': ['Pacifico', 'serif'],
+          title: ["Playwrite IN", "sans-serif"],
+          sans: ["Open Sans", "serif"],
+          pacifico: ["Pacifico", "serif"],
         },
         animation: {
-          fadeIn: 'fadeIn 0.3s ease-in-out',
-          fadeOut: 'fadeOut 0.3s ease-in-out',
+          fadeIn: "fadeIn 0.3s ease-in-out",
+          fadeOut: "fadeOut 0.3s ease-in-out",
         },
         keyframes: {
           fadeIn: {
-            '0%': { opacity: '0.3' },
-            '100%': { opacity: '1' },
+            "0%": { opacity: "0.3" },
+            "100%": { opacity: "1" },
           },
           fadeOut: {
-            '0%': { opacity: '1' },
-            '100%': { opacity: '0.3' },
+            "0%": { opacity: "1" },
+            "100%": { opacity: "0.3" },
           },
         },
       },
     },
     plugins: [],
-  }
+  };
 
-  const indexCssContent  = `
+  const indexCssContent = `
   input::placeholder {
   transition: color 0.2s;
 }
@@ -150,32 +171,35 @@ function addTailwindV3Styles() {
 /* Handle on hover */
 .scroller::-webkit-scrollbar-thumb:hover {
   background: #555; /* Darker color on hover */
-}`
+}`;
 
-  const indexCssPath = path.join(process.cwd(), 'src/index.css');
-  fs.appendFileSync(indexCssPath, indexCssContent, 'utf8');
-  
+  const indexCssPath = path.join(process.cwd(), "src/index.css");
+  fs.appendFileSync(indexCssPath, indexCssContent, "utf8");
 
   mergeTailwindConfig(tailwindConfigPath, customStylesV3);
 }
 
 // Function to prompt for confirmation before overwriting index.css
 function promptForV4Styles() {
-  console.log(`Tailwind v4 detected. The init command will overwrite your css file. Do you want to continue?`);
-  
+  console.log(
+    `Tailwind v4 detected. The init command will overwrite your css file. Do you want to continue?`
+  );
+
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
-  rl.question("Type 'y' to continue or 'n' to cancel: ", function(answer) {
-    if (answer.charAt(0).toLowerCase() === 'y') {
+  rl.question("Type 'y' to continue or 'n' to cancel: ", function (answer) {
+    if (answer.charAt(0).toLowerCase() === "y") {
       console.log("Proceeding with Tailwind v4 custom styles...");
       addTailwindV4Styles();
-    } else if (answer.charAt(0).toLowerCase() === 'n') {
+    } else if (answer.charAt(0).toLowerCase() === "n") {
       console.log("Action canceled. No changes were made.");
     } else {
-      console.log("Invalid input. Please type 'y' to continue or 'n' to cancel.");
+      console.log(
+        "Invalid input. Please type 'y' to continue or 'n' to cancel."
+      );
     }
     rl.close();
   });
@@ -183,42 +207,48 @@ function promptForV4Styles() {
 
 // Function to add custom styles for Tailwind v4 by overwriting the index.css file
 function addTailwindV4Styles() {
-  let indexCssPath = '';
+  let indexCssPath = "";
 
   // Check the framework and set the path accordingly
-  if (fs.existsSync(path.join(process.cwd(), 'next.config.js')) || fs.existsSync(path.join(process.cwd(), 'next.config.ts'))) {
+  if (
+    fs.existsSync(path.join(process.cwd(), "next.config.js")) ||
+    fs.existsSync(path.join(process.cwd(), "next.config.ts"))
+  ) {
     // Next.js
-    indexCssPath = path.join(process.cwd(), 'styles', 'globals.css'); // Assuming Tailwind config in globals.css
-  }
-  
-  else if (fs.existsSync(path.join(process.cwd(), 'vite.config.js')) || fs.existsSync(path.join(process.cwd(), 'vite.config.ts'))) {
+    indexCssPath = path.join(process.cwd(), "styles", "globals.css"); // Assuming Tailwind config in globals.css
+  } else if (
+    fs.existsSync(path.join(process.cwd(), "vite.config.js")) ||
+    fs.existsSync(path.join(process.cwd(), "vite.config.ts"))
+  ) {
     // Vite
-    indexCssPath = path.join(process.cwd(), 'src', 'index.css');
-  } 
-  
-  else if (fs.existsSync(path.join(process.cwd(), 'remix.config.js')) || fs.existsSync(path.join(process.cwd(), 'remix.config.ts'))) {
+    indexCssPath = path.join(process.cwd(), "src", "index.css");
+  } else if (
+    fs.existsSync(path.join(process.cwd(), "remix.config.js")) ||
+    fs.existsSync(path.join(process.cwd(), "remix.config.ts"))
+  ) {
     // Remix
-    indexCssPath = path.join(process.cwd(), 'src', 'styles', 'tailwind.css');
-  } 
-  
-  else if (fs.existsSync(path.join(process.cwd(), 'gatsby-config.js')) || fs.existsSync(path.join(process.cwd(), 'gatsby-config.ts'))) {
+    indexCssPath = path.join(process.cwd(), "src", "styles", "tailwind.css");
+  } else if (
+    fs.existsSync(path.join(process.cwd(), "gatsby-config.js")) ||
+    fs.existsSync(path.join(process.cwd(), "gatsby-config.ts"))
+  ) {
     // Gatsby
-    indexCssPath = path.join(process.cwd(), 'src', 'styles', 'index.css');
-  } 
-  
-  else if (fs.existsSync(path.join(process.cwd(), 'react-router-config.js')) || fs.existsSync(path.join(process.cwd(), 'react-router-config.ts'))) {
+    indexCssPath = path.join(process.cwd(), "src", "styles", "index.css");
+  } else if (
+    fs.existsSync(path.join(process.cwd(), "react-router-config.js")) ||
+    fs.existsSync(path.join(process.cwd(), "react-router-config.ts"))
+  ) {
     // React Router 7 (Can depend on the specific setup, assuming a common path)
-    indexCssPath = path.join(process.cwd(), 'src', 'index.css');
-  } 
-  
-  else if (fs.existsSync(path.join(process.cwd(), 'tanstack.config.js')) || fs.existsSync(path.join(process.cwd(), 'tanstack.config.ts'))) {
+    indexCssPath = path.join(process.cwd(), "src", "index.css");
+  } else if (
+    fs.existsSync(path.join(process.cwd(), "tanstack.config.js")) ||
+    fs.existsSync(path.join(process.cwd(), "tanstack.config.ts"))
+  ) {
     // Tanstack Start
-    indexCssPath = path.join(process.cwd(), 'src', 'styles', 'main.css');
-  } 
-  
-  else {
-    console.log('Framework not recognized, defaulting to index.css');
-    indexCssPath = path.join(process.cwd(), 'src', 'index.css');
+    indexCssPath = path.join(process.cwd(), "src", "styles", "main.css");
+  } else {
+    console.log("Framework not recognized, defaulting to index.css");
+    indexCssPath = path.join(process.cwd(), "src", "index.css");
   }
 
   const customStylesV4 = `@import "tailwindcss";
@@ -280,11 +310,11 @@ input::placeholder {
 `;
 
   // Overwrite the css file
-  fs.writeFileSync(indexCssPath, customStylesV4, 'utf8');
+  fs.writeFileSync(indexCssPath, customStylesV4, "utf8");
   console.log(`Custom styles for Tailwind v4 added at ${indexCssPath}.`);
-};
+}
 
-// Function to download a file from GitHub and save it locally 
+// Function to download a file from GitHub and save it locally
 async function downloadFile(url, destination, filename) {
   try {
     // Fetch the raw file from GitHub
@@ -315,70 +345,20 @@ async function downloadFile(url, destination, filename) {
   }
 }
 
-// Define the mapping between component names and GitHub raw URLs
-const componentMapping = {
-  accordion: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Accordion.tsx',
-  accordiongroup: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/AccordionGroup.tsx',
-  alert: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Alert.tsx',
-  alertmodal: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/AlertModal.tsx',
-  avatar: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Avatar.tsx',
-  badge: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Badge.tsx',
-  card: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Card.tsx',
-  carousel: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Carousel.tsx',
-  checkbox: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Checkbox.tsx',
-  combobox: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Combobox.tsx',
-  drawer: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Drawer.tsx',
-  datepicker: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/DatePicker.tsx',
-  footer: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Footer.tsx',
-  input: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Input.tsx',
-  loader: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Loader.tsx',
-  modal: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Modal.tsx',
-  navbar: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Navbar.tsx',
-  otpinput: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/OTPInput.tsx',
-  passwordinput: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/PasswordInput.tsx',
-  primarybutton: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/PrimaryButton.tsx',
-  progressbar: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/ProgressBar.tsx',
-  radioButton: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/RadioButton.tsx',
-  secondarybutton: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/SecondaryButton.tsx',
-  select: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Select.tsx',
-  securityheaders: "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/SecurityHeaders.tsx",
-  slider: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Slider.tsx',
-  switch: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Switch.tsx',
-  table: "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Table.tsx",
-  textarea: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/TextArea.tsx',
-  timeline: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Timeline.tsx',
-  toggle: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Toggle.tsx',
-  tooltip: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/components/Tooltip.tsx',
-};
-
-// Define the mapping between snippet names and GitHub raw URLs
-const snippetMapping = {
-  usedebounce: 'https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/useDebounce.tsx',
-  axiosinstance : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/axiosInstance.ts",
-  breakurlintopaths : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/breakURLintoPaths.ts",
-  capitalizefirstletters : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/capitalizeFirstLetters.ts",
-  cloudinary: "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/cloudinary.ts",
-  expresstemplate : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/expressTemplate.ts",
-  formatnumber : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/formatNumber.ts",
-  getminstoread : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/getMinsToRead.ts",
-  imagecompression : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/imageCompression.ts",
-  multer : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/multer.ts",
-  regexfunctions:"https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/regexFunctions.ts",
-  shufflearray : "https://raw.githubusercontent.com/roshith-prakash/re-use-it/refs/heads/master/src/utils/shuffleArray.ts"
-}
-
-// Define the init command to set up custom Tailwind style 
+// Define the init command to set up custom Tailwind style
 program
-  .command('init')
-  .description('Initialize custom Tailwind styles for your project.')
-  .action(() => {
+  .command("init")
+  .description("Initialize custom Tailwind styles for your project.")
+  .action(async () => {
     if (!isTailwindInstalled()) {
-      console.error("Tailwind CSS is not installed. Please install Tailwind CSS before proceeding.");
+      console.error(
+        "Tailwind CSS is not installed. Please install Tailwind CSS before proceeding."
+      );
       process.exit(1);
     }
 
     const tailwindVersion = getTailwindVersion();
-    
+
     if (!tailwindVersion) {
       console.error("Unable to determine Tailwind version.");
       process.exit(1);
@@ -386,9 +366,45 @@ program
 
     console.log(`Detected Tailwind CSS version: ${tailwindVersion}`);
 
-    if (tailwindVersion.startsWith('3')) {
+    // Install clsx and tailwind-merge
+    const { execSync } = require("child_process");
+    try {
+      console.log("Installing clsx and tailwind-merge...");
+      execSync("npm install clsx tailwind-merge", { stdio: "inherit" });
+    } catch (error) {
+      console.error(
+        "Failed to install clsx and tailwind-merge:",
+        error.message
+      );
+      process.exit(1);
+    }
+
+    // Create the utils.ts file
+    const libDir = path.join(process.cwd(), "src", "lib");
+    const utilsPath = path.join(libDir, "utils.ts");
+    const utilsContent = `import { clsx, type ClassValue } from "clsx";
+  import { twMerge } from "tailwind-merge";
+  
+  export function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+  }
+  `;
+
+    try {
+      if (!fs.existsSync(libDir)) {
+        fs.mkdirSync(libDir, { recursive: true });
+      }
+      fs.writeFileSync(utilsPath, utilsContent, "utf8");
+      console.log("Created src/lib/utils.ts with cn utility.");
+    } catch (error) {
+      console.error("Failed to create utils.ts:", error.message);
+      process.exit(1);
+    }
+
+    // Proceed with Tailwind styling
+    if (tailwindVersion.startsWith("3")) {
       addTailwindV3Styles();
-    } else if (tailwindVersion.startsWith('4')) {
+    } else if (tailwindVersion.startsWith("4")) {
       promptForV4Styles();
     } else {
       console.log("Unsupported Tailwind version detected.");
@@ -397,12 +413,14 @@ program
 
 // Define the CLI command to fetch and save the file based on the component name
 program
-  .command('add <component>')
-  .description('Add a Re-use-it! component to your project.')
+  .command("add <component>")
+  .description("Add a Re-use-it! component to your project.")
   .action(async (component) => {
     // Check if Tailwind CSS is installed
     if (!isTailwindInstalled()) {
-      console.error("Tailwind CSS is not installed. Please install Tailwind CSS before adding components.");
+      console.error(
+        "Tailwind CSS is not installed. Please install Tailwind CSS before adding components."
+      );
       process.exit(1); // Exit with an error code
     }
 
@@ -424,7 +442,13 @@ program
     const filename = path.basename(url); // e.g., 'PrimaryButton.tsx'
 
     // Define the destination path using the filename from the URL
-    const destinationPath = path.join(projectRoot, 'src', 'components', 'reuseit', filename);
+    const destinationPath = path.join(
+      projectRoot,
+      "src",
+      "components",
+      "reuseit",
+      filename
+    );
 
     // Download the file and save it locally
     await downloadFile(url, destinationPath, filename);
@@ -432,8 +456,8 @@ program
 
 // Define the CLI command to fetch and save the file based on the snippet name
 program
-  .command('add-snippet <snippet>')
-  .description('Add a Re-use-it! snippet to your project.')
+  .command("add-snippet <snippet>")
+  .description("Add a Re-use-it! snippet to your project.")
   .action(async (snippet) => {
     // Convert snippet name to lowercase for case-insensitivity
     const snippetLowerCase = snippet.toLowerCase();
@@ -453,8 +477,7 @@ program
     const filename = path.basename(url); // e.g., 'PrimaryButton.tsx'
 
     // Define the destination path using the filename from the URL
-    const destinationPath = path.join(projectRoot, 'src', 'utils'
-      , filename);
+    const destinationPath = path.join(projectRoot, "src", "utils", filename);
 
     // Download the file and save it locally
     await downloadFile(url, destinationPath, filename);

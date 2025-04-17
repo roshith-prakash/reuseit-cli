@@ -1,13 +1,13 @@
 {
   "name": "reuseit",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "description": "CLI for downloading components from Re-use-it!",
   "main": "index.js",
   "bin": {
     "reuseit": "dist/index.js"
   },
   "scripts": {
-    "build":"npx esbuild index.js --platform=node --bundle --minify --outfile=dist/index.js"
+    "build": "npx esbuild index.js --platform=node --bundle --minify --outfile=dist/index.js"
   },
   "dependencies": {
     "commander": "^8.3.0"
